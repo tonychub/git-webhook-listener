@@ -7,9 +7,6 @@ import cors from "cors";
 
 import { config } from "dotenv";
 config();
-import mongoose from "mongoose";
-const data = process.env.DATABASE;
-mongoose.connect(data!).catch((error) => console.log(error));
 
 const port = process.env.PORT || 9999;
 
@@ -22,7 +19,12 @@ app.get("/", (_req: Request, res: Response) => {
     message: "Hello " + name,
   });
 });
-
+app.post("/", (req: Request, res: Response) => {
+  console.log("data", req.body);
+  res.json({
+    message: "data" + req,
+  });
+});
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
 });
