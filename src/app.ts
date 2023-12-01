@@ -1,41 +1,30 @@
 import moduleAlias from "module-alias";
-import { myAction, myFetch } from "./api/myApi";
+import { config } from "dotenv";
+config();
+import { myAction } from "./api/myApi";
 moduleAlias.addAliases({
   "@": __dirname,
 });
 import express, { Application, Request, Response } from "express";
+import data from "./example.json";
 import cors from "cors";
-
-import { config } from "dotenv";
-config();
-type IData = {
-  listen_type: string;
-  from: string;
-  to: string;
-  actionGet: {
-    method: string;
-    url: string;
-  };
-  actionPost: {
-    method: string;
-    url: string;
-  };
-};
+import { IAction } from "./type";
 
 const port = process.env.PORT || 9999;
-
 const app: Application = express();
 const name = process.env.MYNAME || "Kun";
 app.use(cors());
 app.use(express.json());
 
 const fetchActions = async (body: any) => {
-  const actionData = await myFetch("/actions", "GET");
-
-  (actionData as IData[]).map(async (item) => {
-    if (item.listen_type === body.action) {
-      const res = await myAction(item.actionGet.method, item.actionGet.url);
-      myAction(item.actionPost.method, item.actionPost.url, res.data);
+  (data.actions as IAction[]).map(async (item) => {
+    const { listen_type, from, to } = item;
+    if (
+      listen_type === body.action &&
+      body.pull_request.head.ref === from &&
+      body.pull_request.base.ref === to
+    ) {
+      const res = await myAction(item.action);
     }
   });
 };

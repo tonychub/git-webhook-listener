@@ -10,7 +10,11 @@
     "esModuleInterop": true,                             
     "forceConsistentCasingInFileNames": true,
     "strict": true,                                     
-    "skipLibCheck": true},
-  "include": ["next-env.d.ts", "***/**/*.ts", "***/**/*.tsx"],
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+  },
+    
+  "include": ["next-env.d.ts", "***/**/*.ts", "***/**/*.tsx","***/**/*.json"],
   "exclude": ["node_modules"],
 }

@@ -8,6 +8,7 @@
     "dev": "nodemon src/app.ts",
     "start": "node dist/app.js"
   },
+
   "repository": {
     "type": "git",
     "url": "git+https://github.com/longtonytech/learn-nodejs.git"
