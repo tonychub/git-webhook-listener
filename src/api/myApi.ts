@@ -23,7 +23,7 @@ const getScriptById = (id: string) => {
 const runScriptById = (id: string) => {
   const data = {
     method: "POST",
-    url: `${baseUrl}/scripts/${id}/run`,
+    url: `${baseUrl}/scripts/${id}/run-webhook`,
     headers: header,
   };
   return myResponse(data);
