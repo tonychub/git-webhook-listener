@@ -3,7 +3,7 @@ import { config } from "dotenv";
 config();
 
 const baseUrl = process.env.API_URL || "http://116.118.50.224:9999";
-const token = process.env.ACCESS_TOKEN;
+const token = process.env.ACCESS_TOKEN_WEBHOOK;
 const header = {
   Accept: "application/json",
   Authorization: `Bearer ${token}`,
