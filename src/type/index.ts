@@ -1,13 +1,12 @@
-export type IAction = {
-  listen_type: string;
+export type IWebhookAction = {
+  _id: string;
+  teamId: string;
+  name: string;
+  listenType: string;
   from: string;
   to: string;
-  action: {
-    method: string;
-    url: string;
-    headers: {
-      Accept: string;
-      Authorization: string;
-    };
-  };
+  scriptId: string;
+  hostId: string;
+  createdAt: string;
+  updatedAt: string;
 };
