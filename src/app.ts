@@ -9,7 +9,11 @@ import express, { Application, Request, Response } from "express";
 
 import cors from "cors";
 import { IWebhookAction } from "./type";
-import { RUN_ACTION_ERRORS, RUN_ACTION_SUCCESS } from "./constants";
+import {
+  PULLREQUEST_STATUS,
+  RUN_ACTION_ERRORS,
+  RUN_ACTION_SUCCESS,
+} from "./constants";
 
 const port = process.env.PORT || 9999;
 const app: Application = express();
@@ -17,27 +21,27 @@ const name = process.env.MYNAME || "Kun";
 app.use(cors());
 app.use(express.json());
 
-const responseActions = async (
-  body: any,
-  webhookAction: IWebhookAction
-): Promise<boolean> => {
-  const { listenType, from, to, scriptId } = webhookAction;
+const checkPullRequestStatus = (body: any, webhookAction: IWebhookAction) => {
+  const { listenType, from, to } = webhookAction;
   if (
     body.pull_request.head.ref === from &&
     body.pull_request.base.ref === to
   ) {
-    if (body.action === "opened") {
+    if (body.action === PULLREQUEST_STATUS.OPENED) {
       if (listenType === body.action) {
-        await runScriptById(scriptId);
         return true;
       }
-    } else if (body.action === "closed") {
-      if (!body.pull_request.merged && listenType === "closed") {
-        await runScriptById(scriptId);
+    } else if (body.action === PULLREQUEST_STATUS.CLOSED) {
+      if (
+        !body.pull_request.merged &&
+        listenType === PULLREQUEST_STATUS.CLOSED
+      ) {
         return true;
       }
-      if (body.pull_request.merged && listenType === "merged") {
-        await runScriptById(scriptId);
+      if (
+        body.pull_request.merged &&
+        listenType === PULLREQUEST_STATUS.MERGED
+      ) {
         return true;
       }
     }
@@ -55,9 +59,10 @@ app.post("/webhook/:webhookActionId", async (req: Request, res: Response) => {
     const webhookAction = await getWebhookActionById(
       req.params.webhookActionId
     );
-    const data = await responseActions(req.body, webhookAction);
-    if (data) {
-      return res.json({
+    const isAction = checkPullRequestStatus(req.body, webhookAction);
+    if (isAction) {
+      await runScriptById(webhookAction.scriptId);
+      res.json({
         message: RUN_ACTION_SUCCESS.msg,
       });
     } else {
