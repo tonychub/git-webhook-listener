@@ -23,10 +23,15 @@ app.use(express.json());
 
 const checkPullRequestStatus = (body: any, webhookAction: IWebhookAction) => {
   const { listenType, from, to } = webhookAction;
-  if (
-    body.pull_request.head.ref === from &&
-    body.pull_request.base.ref === to
-  ) {
+  const conditionBranch = () => {
+    if (from) {
+      return (
+        body.pull_request.head.ref === from && body.pull_request.base.ref === to
+      );
+    }
+    return body.pull_request.base.ref === to;
+  };
+  if (conditionBranch()) {
     if (body.action === PULLREQUEST_STATUS.OPENED) {
       if (listenType === body.action) {
         return true;
