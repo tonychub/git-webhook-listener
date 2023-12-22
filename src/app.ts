@@ -56,12 +56,12 @@ app.get("/", (_req: Request, res: Response) => {
 });
 app.post("/webhook/:webhookActionId", async (req: Request, res: Response) => {
   try {
-    const webhookAction = await getWebhookActionById(
-      req.params.webhookActionId
-    );
-    const isAction = checkPullRequestStatus(req.body, webhookAction);
+    const res = await getWebhookActionById(req.params.webhookActionId);
+
+    const isAction = checkPullRequestStatus(req.body, res.data);
+
     if (isAction) {
-      await runScriptById(webhookAction.scriptId);
+      await runScriptById(res.data.scriptId);
       res.json({
         message: RUN_ACTION_SUCCESS.msg,
       });
