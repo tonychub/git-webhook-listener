@@ -1,10 +1,10 @@
-import { config } from "dotenv";
-config();
 import moduleAlias from "module-alias";
-import { getWebhookActionById } from "@/api/myApi";
 moduleAlias.addAliases({
   "@": __dirname,
 });
+import { config } from "dotenv";
+config();
+import { getWebhookActionById } from "@/api/myApi";
 import express, { Application, Request, Response } from "express";
 
 import cors from "cors";
@@ -65,8 +65,10 @@ app.post("/webhook/:webhookActionId", async (req: Request, res: Response) => {
     const resWebhookAction = await getWebhookActionById(
       req.params.webhookActionId
     );
+
     const scriptIds = resWebhookAction.data.additionalScriptIds;
     const isAction = checkPullRequestStatus(req.body, resWebhookAction.data);
+
     if (isAction) {
       const status = await handleRunScript(resWebhookAction.data.scriptId);
       if (status === "error") {
@@ -74,6 +76,7 @@ app.post("/webhook/:webhookActionId", async (req: Request, res: Response) => {
           message: RUN_ACTION_ERRORS.msg,
         });
       }
+
       if (scriptIds.length > 0) {
         for (let index = 0; index < scriptIds.length; index++) {
           const statusAdditionalScript = await handleRunScript(
