@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig } from "axios";
 import { config } from "dotenv";
+
 config();
 
 const baseUrl = process.env.API_URL || "http://116.118.50.224:9999";
@@ -28,6 +29,14 @@ const runScriptById = (id: string) => {
   };
   return myResponse(data);
 };
+const fetchHistory = (scritpId: string, historyId: string) => {
+  const data = {
+    method: "GET",
+    url: `${baseUrl}/scripts/${scritpId}/histories/${historyId}`,
+    headers: header,
+  };
+  return myResponse(data);
+};
 const getWebhookActionById = (id: string) => {
   const data = {
     method: "GET",
@@ -36,4 +45,10 @@ const getWebhookActionById = (id: string) => {
   };
   return myResponse(data);
 };
-export { myResponse, getScriptById, runScriptById, getWebhookActionById };
+export {
+  myResponse,
+  getScriptById,
+  runScriptById,
+  getWebhookActionById,
+  fetchHistory,
+};
