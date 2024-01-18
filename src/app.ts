@@ -1,19 +1,20 @@
-import moduleAlias from "module-alias";
 import { config } from "dotenv";
 config();
-import { getWebhookActionById, runScriptById } from "./api/myApi";
+import moduleAlias from "module-alias";
+import { getWebhookActionById } from "@/api/myApi";
 moduleAlias.addAliases({
   "@": __dirname,
 });
 import express, { Application, Request, Response } from "express";
 
 import cors from "cors";
-import { IWebhookAction } from "./type";
+import { IWebhookAction } from "@/type/index";
 import {
   PULLREQUEST_STATUS,
   RUN_ACTION_ERRORS,
   RUN_ACTION_SUCCESS,
-} from "./constants";
+} from "@/constants/index";
+import { handleRunScript } from "@/handler/index";
 
 const port = process.env.PORT || 9999;
 const app: Application = express();
@@ -61,13 +62,31 @@ app.get("/", (_req: Request, res: Response) => {
 });
 app.post("/webhook/:webhookActionId", async (req: Request, res: Response) => {
   try {
-    const res = await getWebhookActionById(req.params.webhookActionId);
-
-    const isAction = checkPullRequestStatus(req.body, res.data);
-
+    const resWebhookAction = await getWebhookActionById(
+      req.params.webhookActionId
+    );
+    const scriptIds = resWebhookAction.data.additionalScriptIds;
+    const isAction = checkPullRequestStatus(req.body, resWebhookAction.data);
     if (isAction) {
-      await runScriptById(res.data.scriptId);
-      res.json({
+      const status = await handleRunScript(resWebhookAction.data.scriptId);
+      if (status === "error") {
+        return res.status(RUN_ACTION_ERRORS.code).json({
+          message: RUN_ACTION_ERRORS.msg,
+        });
+      }
+      if (scriptIds.length > 0) {
+        for (let index = 0; index < scriptIds.length; index++) {
+          const statusAdditionalScript = await handleRunScript(
+            scriptIds[index]
+          );
+          if (statusAdditionalScript === "error") {
+            return res.status(RUN_ACTION_ERRORS.code).json({
+              message: RUN_ACTION_ERRORS.msg,
+            });
+          }
+        }
+      }
+      return res.json({
         message: RUN_ACTION_SUCCESS.msg,
       });
     } else {
